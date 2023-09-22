@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"order-service/models"
 	"order-service/service"
@@ -18,7 +17,7 @@ func NewServer(srv service.Service) *Server {
 	return &Server{srv: srv}
 }
 
-func (s *Server) Start() {
+func (s *Server) Start() error {
 	http.HandleFunc("/orders", func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method == http.MethodPost {
 			var order models.Order
@@ -44,5 +43,5 @@ func (s *Server) Start() {
 		}
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	return http.ListenAndServe(":8080", nil)
 }

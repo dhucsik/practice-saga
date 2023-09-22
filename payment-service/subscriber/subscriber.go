@@ -6,7 +6,7 @@ import (
 )
 
 type Subscriber interface {
-	Subscribe() error
+	SubscribeOrders() error
 	Start() error
 }
 

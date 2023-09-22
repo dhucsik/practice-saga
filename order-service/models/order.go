@@ -6,7 +6,6 @@ type Order struct {
 	Status string `json:"status"`
 	// suppose we have another fields
 
-	IsCreated        bool `json:"-"`
 	IsPaid           bool `json:"-"`
 	NotificationSent bool `json:"-"`
 }

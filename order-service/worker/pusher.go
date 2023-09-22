@@ -8,6 +8,8 @@ import (
 )
 
 type PusherWorker interface {
+	Start() error
+	Work() error
 }
 
 type pusherWorker struct {
@@ -20,7 +22,7 @@ func New(srv service.Service) PusherWorker {
 	}
 }
 
-func (w *pusherWorker) Start(ctx context.Context) {
+func (w *pusherWorker) Start() error {
 	c := cron.New()
 
 	_, err := c.AddFunc("@every 10s", func() {
@@ -31,9 +33,12 @@ func (w *pusherWorker) Start(ctx context.Context) {
 	})
 	if err != nil {
 		log.Println("error: ", err.Error())
+		return err
 	}
 
 	go c.Start()
+
+	return nil
 }
 
 func (w *pusherWorker) Work() error {

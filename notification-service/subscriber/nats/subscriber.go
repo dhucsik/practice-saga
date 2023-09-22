@@ -26,7 +26,7 @@ func New(srv service.Service) (*broker, error) {
 	}, nil
 }
 
-func (b *broker) Subscribe() error {
+func (b *broker) SubscribeOrders() error {
 	b.nc.Subscribe("notifications.orders", func(msg *nats.Msg) {
 		var notifiaction *models.Notification
 
@@ -46,7 +46,7 @@ func (b *broker) Subscribe() error {
 }
 
 func (b *broker) Start() error {
-	if err := b.Subscribe(); err != nil {
+	if err := b.SubscribeOrders(); err != nil {
 		return err
 	}
 

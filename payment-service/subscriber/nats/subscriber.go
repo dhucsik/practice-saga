@@ -23,9 +23,9 @@ func New(srv service.Service) (*broker, error) {
 	return &broker{nc: nc, srv: srv}, nil
 }
 
-func (b *broker) Subscribe() error {
+func (b *broker) SubscribeOrders() error {
 	// order data
-	b.nc.Subscribe("payments", func(msg *nats.Msg) {
+	b.nc.Subscribe("payments.orders", func(msg *nats.Msg) {
 		var order *models.Order
 
 		if err := json.Unmarshal(msg.Data, order); err != nil {
@@ -44,7 +44,7 @@ func (b *broker) Subscribe() error {
 }
 
 func (b *broker) Start() error {
-	if err := b.Subscribe(); err != nil {
+	if err := b.SubscribeOrders(); err != nil {
 		return err
 	}
 

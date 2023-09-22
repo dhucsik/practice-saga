@@ -15,7 +15,7 @@ type broker struct {
 }
 
 func New(srv service.Service) (*broker, error) {
-	nc, err := nats.Connect("")
+	nc, err := nats.Connect("nats://localhost:4222")
 	if err != nil {
 		return nil, err
 	}
