@@ -33,7 +33,7 @@ func New() (Repository, error) {
 }
 
 func (r *repository) CreateOrder(ctx context.Context, order *models.Order) error {
-	err := r.pool.QueryRow(ctx, `INSERT INTO orders (item_id, status, is_paid, notification_sent) VALUES ($1, $2, $3, $4)`).Scan(&order.ID)
+	err := r.pool.QueryRow(ctx, `INSERT INTO orders (item_id, status, is_paid, notification_sent) VALUES ($1, 'PROCESSING', FALSE, FALSE) RETURNING id`, order.ItemID).Scan(&order.ID)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (r *repository) UpdateOrderStatus(ctx context.Context, orderID int, status 
 }
 
 func (r *repository) OrderSent(ctx context.Context, orderID int) error {
-	_, err := r.pool.Exec(ctx, `UPDATE orders SET notification_sent = true, status = 'success' WHERE id = $1`, orderID)
+	_, err := r.pool.Exec(ctx, `UPDATE orders SET notification_sent = true, status = 'SUCCESS' WHERE id = $1`, orderID)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (r *repository) OrderSent(ctx context.Context, orderID int) error {
 }
 
 func (r *repository) CancelOrder(ctx context.Context, orderID int) error {
-	_, err := r.pool.Exec(ctx, `UPDATE orders SET status = 'Fail' WHERE id = $1`, orderID)
+	_, err := r.pool.Exec(ctx, `UPDATE orders SET status = 'FAIL' WHERE id = $1`, orderID)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func (r *repository) CancelOrder(ctx context.Context, orderID int) error {
 }
 
 func (r *repository) OrderPaid(ctx context.Context, orderID int) error {
-	_, err := r.pool.Exec(ctx, `UPDATE orders SET is_paid = true WHERE id = $1`, orderID)
+	_, err := r.pool.Exec(ctx, `UPDATE orders SET is_paid = TRUE WHERE id = $1`, orderID)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (r *repository) OrderPaid(ctx context.Context, orderID int) error {
 func (r *repository) GetProcessingOrders(ctx context.Context) ([]*models.Order, error) {
 	var mm []*models.Order
 
-	err := pgxscan.Select(ctx, r.pool, &mm, `SELECT id, item_id, status, is_paid, notification_sent FROM orders WHERE status = 'processing'`)
+	err := pgxscan.Select(ctx, r.pool, &mm, `SELECT id, item_id, status, is_paid, notification_sent FROM orders WHERE status = 'PROCESSING'`)
 	if err != nil {
 		return nil, err
 	}

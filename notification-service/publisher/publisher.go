@@ -2,7 +2,7 @@ package publisher
 
 import (
 	"context"
-	"mail-service/publisher/nats"
+	"notification-service/publisher/nats"
 )
 
 type Publisher interface {

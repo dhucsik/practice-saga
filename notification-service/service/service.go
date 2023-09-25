@@ -3,8 +3,9 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"mail-service/models"
-	"mail-service/publisher"
+	"fmt"
+	"notification-service/models"
+	"notification-service/publisher"
 )
 
 type Service interface {
@@ -37,6 +38,7 @@ func (s *service) PushToOrders(ctx context.Context, notification *models.Notific
 
 func (s *service) SendNotification(ctx context.Context, notification *models.Notification) error {
 	// send notification
+	fmt.Println(notification)
 
 	return s.PushToOrders(ctx, notification)
 }

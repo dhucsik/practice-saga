@@ -30,6 +30,7 @@ func InitApp(ctx context.Context) *App {
 		app.initService,
 		app.initSubscriber,
 		app.initHTTPServer,
+		app.initWorker,
 	} {
 		err := init(ctx)
 		if err != nil {
@@ -41,8 +42,17 @@ func InitApp(ctx context.Context) *App {
 	return app
 }
 
+func (a *App) initWorker(_ context.Context) error {
+	a.worker = worker.New(a.srv)
+	return nil
+}
+
 func (a *App) initRepository(_ context.Context) error {
-	a.repo = repository.New()
+	var err error
+	a.repo, err = repository.New()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

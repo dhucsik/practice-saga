@@ -4,9 +4,9 @@ import (
 	"context"
 	"golang.org/x/sync/errgroup"
 	"log"
-	"mail-service/publisher"
-	"mail-service/service"
-	"mail-service/subscriber"
+	"notification-service/publisher"
+	"notification-service/service"
+	"notification-service/subscriber"
 )
 
 type App struct {

@@ -1,8 +1,8 @@
 package subscriber
 
 import (
-	"mail-service/service"
-	"mail-service/subscriber/nats"
+	"notification-service/service"
+	"notification-service/subscriber/nats"
 )
 
 type Subscriber interface {

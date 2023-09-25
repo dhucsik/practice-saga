@@ -26,14 +26,14 @@ func New(srv service.Service) (*broker, error) {
 func (b *broker) SubscribeOrders() error {
 	// order data
 	b.nc.Subscribe("payments.orders", func(msg *nats.Msg) {
-		var order *models.Order
+		var order models.Order
 
-		if err := json.Unmarshal(msg.Data, order); err != nil {
+		if err := json.Unmarshal(msg.Data, &order); err != nil {
 			log.Println("error: " + err.Error())
 			return
 		}
 
-		err := b.srv.ProcessPayment(context.TODO(), order)
+		err := b.srv.ProcessPayment(context.TODO(), &order)
 		if err != nil {
 			log.Println("error: " + err.Error())
 			return

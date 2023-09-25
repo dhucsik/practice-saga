@@ -10,6 +10,7 @@ import (
 
 type Service interface {
 	ProcessPayment(ctx context.Context, order *models.Order) error
+	PaidPayment(ctx context.Context, paymentID int) error
 }
 
 type service struct {
@@ -44,15 +45,21 @@ func (s *service) ProcessPayment(ctx context.Context, order *models.Order) error
 		return err
 	}
 
-	if payment != nil {
+	if payment.OrderID != 0 {
 		return s.PushToOrders(ctx, payment)
 	}
 
-	payment = &models.Payment{OrderID: order.ID, Status: "paid"}
+	payment = &models.Payment{OrderID: order.ID}
 	err = s.repo.CreatePayment(ctx, payment)
 	if err != nil {
+		payment.Status = "FAIL"
 		return err
 	}
 	// if success publish to order service payment information with status success
+	payment.Status = "SUCCESS"
 	return s.PushToOrders(ctx, payment)
+}
+
+func (s *service) PaidPayment(ctx context.Context, paymentID int) error {
+	return s.repo.PaidPayment(ctx, paymentID)
 }

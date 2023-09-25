@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"github.com/nats-io/nats.go"
 	"log"
-	"mail-service/models"
-	"mail-service/service"
+	"notification-service/models"
+	"notification-service/service"
 )
 
 type broker struct {
@@ -28,14 +28,14 @@ func New(srv service.Service) (*broker, error) {
 
 func (b *broker) SubscribeOrders() error {
 	b.nc.Subscribe("notifications.orders", func(msg *nats.Msg) {
-		var notifiaction *models.Notification
+		var notifiaction models.Notification
 
-		if err := json.Unmarshal(msg.Data, notifiaction); err != nil {
+		if err := json.Unmarshal(msg.Data, &notifiaction); err != nil {
 			log.Println("error: " + err.Error())
 			return
 		}
 
-		err := b.srv.SendNotification(context.TODO(), notifiaction)
+		err := b.srv.SendNotification(context.TODO(), &notifiaction)
 		if err != nil {
 			log.Println("error: " + err.Error())
 			return

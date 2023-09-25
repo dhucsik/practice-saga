@@ -56,11 +56,15 @@ func (s *service) PushToPayment(ctx context.Context, order *models.Order) error 
 }
 
 func (s *service) UpdateOrderPayment(ctx context.Context, payment *models.Payment) error {
-	if payment.Status == "success" {
+	if payment.Status == "SUCCESS" {
 		return s.repo.OrderPaid(ctx, payment.OrderID)
 	}
 
-	return s.CancelOrder(ctx, payment.OrderID)
+	if payment.Status == "FAIL" {
+		return s.CancelOrder(ctx, payment.OrderID)
+	}
+
+	return nil
 }
 
 func (s *service) PushToNotification(ctx context.Context, order *models.Order) error {

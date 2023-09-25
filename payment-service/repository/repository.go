@@ -2,6 +2,9 @@ package repository
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"payment-service/models"
 )
@@ -9,6 +12,7 @@ import (
 type Repository interface {
 	CreatePayment(ctx context.Context, payment *models.Payment) error
 	CheckOrder(ctx context.Context, orderID int) (*models.Payment, error)
+	PaidPayment(ctx context.Context, paymentID int) error
 }
 
 type repository struct {
@@ -28,9 +32,9 @@ func New() (Repository, error) {
 }
 
 func (r *repository) CreatePayment(ctx context.Context, payment *models.Payment) error {
-	err := r.pool.QueryRow(ctx, "INSERT INTO payments (order_id) VALUES ($1) RETURNING id").Scan(&payment.ID)
+	err := r.pool.QueryRow(ctx, `INSERT INTO payments (order_id, status) VALUES ($1, 'PENDING') RETURNING id`, payment.OrderID).Scan(&payment.ID)
 	if err != nil {
-		return err
+		return fmt.Errorf("create payment", err)
 	}
 
 	return nil
@@ -38,10 +42,19 @@ func (r *repository) CreatePayment(ctx context.Context, payment *models.Payment)
 
 func (r *repository) CheckOrder(ctx context.Context, orderID int) (*models.Payment, error) {
 	payment := &models.Payment{}
-	err := r.pool.QueryRow(ctx, "SELECT id, order_id FROM payments WHERE order_id = $1", orderID).Scan(payment)
-	if err != nil {
-		return nil, err
+	err := r.pool.QueryRow(ctx, `SELECT id, order_id, status FROM payments WHERE id = $1`, orderID).Scan(&payment.ID, &payment.OrderID, &payment.Status)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("check order", err)
 	}
 
 	return payment, nil
+}
+
+func (r *repository) PaidPayment(ctx context.Context, paymentID int) error {
+	_, err := r.pool.Exec(ctx, `UPDATE payments SET status = 'SUCCESS' WHERE id = $1`, paymentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
